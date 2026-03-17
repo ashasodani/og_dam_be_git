@@ -52,6 +52,9 @@ class CompanyRepository extends BaseRepository
 
         // $query = Countries::withCount('ports');
 
+        $country_id = $request->input('country_id');
+        $city_id = $request->input('city_id');
+
         $query = Companies::when($search, function ($query, $search) use ($searchColumns) {
             $query->where(function ($q) use ($search, $searchColumns) {
                 foreach ($searchColumns as $column) {
@@ -59,7 +62,17 @@ class CompanyRepository extends BaseRepository
                 }
             });
         });
+
+        if ($country_id) {
+            $query->where('country_id', $country_id);
+        }
+
+        if ($city_id) {
+            $query->where('port_id', $city_id);
+        }
+
         $data = $query->orderBy('port_name', 'asc')->paginate($append['per_page']);
+
         return $data;
     }
 
@@ -74,31 +87,31 @@ class CompanyRepository extends BaseRepository
         //$sortBy = $request->input('sort_by', 'country_name');
         $sortOrder = $request->input('sort_order', 'asc');
 
-        $query = \App\Models\Countries::with(['companies.port']);
-
-        if ($searchby === '1') {
+        $query = \App\Models\Countries::with(['companies' => function ($q) use ($city_id, $search) {
+            if ($city_id) {
+                $q->where('port_id', $city_id);
+            }
             if ($search) {
-                $query->whereHas('companies', function ($q) use ($search) {
-                    $q->where('company_name', 'ilike', '%' . $search . '%');
-                });
+                $q->where('company_name', 'ilike', '%' . $search . '%');
             }
-        } else {
-            if ($country_id) {
-                $query->where('id', $country_id);
-            }
+            $q->orderBy('company_name', 'asc');
+        }, 'companies.port']);
 
-            $query->when($city_id || $search, function ($q) use ($city_id, $search) {
-                $q->whereHas('companies', function ($companyQuery) use ($city_id, $search) {
-                    if ($city_id) {
-                        $companyQuery->where('port_id', $city_id);
-                    }
-                    if ($search) {
-                        $companyQuery->where('company_name', 'ilike', '%' . $search . '%');
-                    }
-                    $companyQuery->orderBy('port_name', 'asc');
-                });
+        if ($country_id) {
+            $query->where('id', $country_id);
+        }
+
+        if ($city_id || $search) {
+            $query->whereHas('companies', function ($q) use ($city_id, $search) {
+                if ($city_id) {
+                    $q->where('port_id', $city_id);
+                }
+                if ($search) {
+                    $q->where('company_name', 'ilike', '%' . $search . '%');
+                }
             });
         }
+
       
 
         
@@ -124,21 +137,18 @@ class CompanyRepository extends BaseRepository
 
         $query = Companies::with(['country', 'port']);
 
-        if ($searchby === '1') {
-            if ($search) {
-                $query->where('company_name', 'ilike', '%' . $search . '%');
-            }
-        } else {
-            if ($country_id) {
-                $query->where('country_id', $country_id);
-            }
-            if ($city_id) {
-                $query->where('port_id', $city_id);
-            }
-            if ($search) {
-                $query->where('company_name', 'ilike', '%' . $search . '%');
-            }
+        if ($country_id) {
+            $query->where('country_id', $country_id);
         }
+
+        if ($city_id) {
+            $query->where('port_id', $city_id);
+        }
+
+        if ($search) {
+            $query->where('company_name', 'ilike', '%' . $search . '%');
+        }
+
 
         $companies = $query->orderByRaw('CASE WHEN company_name ~ \'^[0-9]\' THEN 0 ELSE 1 END, company_name ASC')->get();
        

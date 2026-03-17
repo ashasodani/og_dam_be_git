@@ -123,7 +123,12 @@ class CompanyController extends BaseController
        
        // dd($companyData);
         try {
-            if($request->get('order_by') === 'country-city'){
+            
+            if ($request->get('order_by') === 'country-city') {
+                if ($request->get('searchby') === '0' && !$request->get('country_id')) {
+                    return $this->sendError('Country name is required', [], 422);
+                }
+
                 $companyData = $this->CompanyService->getDirectoryCollection($request);
                 return $this->successResponse(
                     new BaseCollection($companyData, DirectoryResource::class),
