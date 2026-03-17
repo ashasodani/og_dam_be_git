@@ -21,7 +21,6 @@ use App\Http\Requests\Collection\CollectionRemoveRequest;
 use App\Http\Requests\Asset\RemoveFromLabelsRequest;
 use App\Http\Resources\AssetResource;
 use App\Http\Resources\AssetLogResource;
-use App\Models\Assets;
 use App\Models\ShareLinks;
 use App\Services\AssetActionService;
 use Illuminate\Http\JsonResponse;
