@@ -27,14 +27,14 @@ class CountryController extends BaseController
     protected $permissionSlugs;
 
     /**
-     * TagController constructor
+     * CountryController constructor
      *
-     * @param CountryService   $tagService   The service for handling Tag related operations.
+     * @param CountryService   $countryService   The service for handling Country related operations.
      */
     public function __construct(CountryService $countryService)
     {
         $this->countryService      = $countryService;
-        $this->moduleName      = trans("tag.module_name");
+        $this->moduleName      = trans("country.module_name");
         $this->permissionSlugs = PermissionEnum::Slugs->getAll();
     }
 
@@ -88,9 +88,9 @@ class CountryController extends BaseController
     }
 
     /**
-     * Display the specified Tag.
+     * Display the specified Country.
      *
-     * @param int $tagId The ID of the Tag to view.
+     * @param int $Id The ID of the Country to view.
      *
      * @return Mixed
      */
@@ -113,10 +113,32 @@ class CountryController extends BaseController
         }
     }
 
-    
-
     /**
-     * Remove the specified Tag from storage.
+     * Update the specified country in storage.
+     *
+     * @param int $countryId The ID of the country to update.
+     * @param CountryUpdateRequest $request The request containing the validated data.
+     * @return JsonResponse
+     */
+    public function update(int $countryId, CountryUpdateRequest $request): JsonResponse
+    {
+        $this->authorize($this->permissionSlugs["countries"]["update"], Countries::class);
+
+        try {
+            $country = $this->countryService->updateCountry($countryId, $request->validated());
+            return $this->successResponse(
+                new CountryResource($country),
+                trans(
+                    'common.update_successfully',
+                    ['module' => $this->moduleName]
+                ));
+        } catch (\Throwable $throwable) {
+            report($throwable);
+            return response()->json(['error' => $throwable->getMessage()], 500);
+        }
+    }
+    /**
+     * Remove the specified Country from storage.
      *
      * @param Request $request The request object.
      * @param int  $tagid id of the tag.
@@ -143,7 +165,7 @@ class CountryController extends BaseController
         }
     }
      /**
-     * Get all tag the specified Tag from storage.
+     * Get all countries from storage.
      *
      * @param Request $request The request object.
      * @param int  $tagid id of the tag.
@@ -156,7 +178,7 @@ class CountryController extends BaseController
 
         try {
             return $this->successResponse(
-                CountryResource::collection($countryData),
+                new BaseCollection($countryData, CountryResource::class),
                 trans(
                     'common.fetch_successfully',
                     ['module' => $this->moduleName]

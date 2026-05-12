@@ -43,7 +43,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function(AuthorizationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'You are not authorized to perform this actions'
+                'message' => 'You are not authorized to perform this action'
             ], 403);
         });
 
@@ -57,10 +57,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function(AuthenticationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'You are not authorized to perform this actions',
-                'errors' => 'You are not authorized to perform this actions',
-                'error_code' => 405
-            ], 405);
+                'message' => 'You are not authorized to perform this action',
+                'errors' => 'You are not authorized to perform this action',
+                'error_code' => 401
+            ], 401);
         });
         $exceptions->render(function(MethodNotAllowedHttpException $e) {
             return response()->json([
@@ -72,8 +72,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function(RouteNotFoundException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'You are not authorized to perform this actions',
-                'errors' => 'You are not authorized to perform this actions',
+                'message' => 'You are not authorized to perform this action',
+                'errors' => 'You are not authorized to perform this action',
                 'error_code' => 403
             ], 403);
         });

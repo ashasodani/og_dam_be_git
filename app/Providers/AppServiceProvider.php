@@ -10,7 +10,7 @@ use App\Services\LoginService;
 use App\Services\LogoutService;
 use App\Services\PermissionService;
 use Spatie\Permission\Models\Permission;
-use Illuminate\Support\Facades\Request;
+
 
 
 class AppServiceProvider extends ServiceProvider
@@ -32,21 +32,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::before(function ($user, $ability) {
+            return $user->hasRole('Super Admin') ? true : null;
+        });
+
         try {
             $data = Permission::all()->pluck('name')->toArray();
             foreach ($data as $permission) {
                 Gate::define(
                     $permission,
                     function ($user) use ($permission) {
-                        $workspaceId = Request::header('X-Workspace-ID');
-                        if(!$workspaceId){
-                            $userPermission =  $user->getAllPermissions()->pluck('name')->toArray();
-                            return (bool) in_array($permission, $userPermission);
-                        } else {
-                            $permissionServiceClass = $this->app->make(PermissionService::class);
-                            $permissionNames = $permissionServiceClass->getAllPermissionWithWorkspace($user, $workspaceId);
-                            return (bool) in_array($permission, $permissionNames->toArray());
-                        }
+                        $userPermission =  $user->getAllPermissions()->pluck('name')->toArray();
+                        return (bool) in_array($permission, $userPermission);
                     }
                 );
             }

@@ -35,10 +35,10 @@ class CountryRepository extends BaseRepository
     public function countryWithWorkspace($request): LengthAwarePaginator
     {
         $relation           = $request->has('include') ? $request->get('include') : ['users'];
-        $perPage            = request()->input('per_page', 10000);
+        $perPage            = $request->get('per_page', $request->get('limit', 10));
        // $slug               = request()->input('slug');
         $append             = $request->all();
-        $append['per_page'] = $perPage ?? 10000;
+        $append['per_page'] = $perPage ?? 10;
         $columns            = ['*'];
         $searchColumns      = ['name'];
         $search             = $append['search'] ?? '';
